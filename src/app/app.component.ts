@@ -12,8 +12,10 @@ import {Observable} from "rxjs";
 })
 export class AppComponent implements OnInit {
 
+  title: string = 'Ameen App';
   loginState$: Observable<boolean>;
   isAuthenticated: boolean = false;
+
 
   constructor(private router: Router,
               private cognitoService: CognitoService,
