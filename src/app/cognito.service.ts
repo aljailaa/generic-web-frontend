@@ -22,7 +22,7 @@ export interface IUser {
 })
 export class CognitoService {
 
-  private isUserAuthenticated: boolean = true;
+  private isUserAuthenticated: boolean = false;
 
   constructor(private store: Store<{ loginState: boolean }>) {
     Amplify.configure({
@@ -49,7 +49,7 @@ export class CognitoService {
   }
 
   public signOut(): Promise<any> {
-    return Auth.signOut()
+    return Auth.signOut({global: true})
       .then(() => {
         this.store.dispatch(logout())
         // this.authenticationSubject.next(false);
@@ -89,6 +89,10 @@ export class CognitoService {
       .then((cognitoUser: any) => {
         return Auth.updateUserAttributes(cognitoUser, user);
       });
+  }
+
+  async currentSession() {
+    await Auth.currentSession().then(sess => {})
   }
 
   public updateIsAuthenticated(val: boolean) {
