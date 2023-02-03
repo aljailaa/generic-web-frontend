@@ -13,7 +13,7 @@ import {Observable} from "rxjs";
 export class AppComponent implements OnInit {
 
   loginState$: Observable<boolean>;
-  isAuthenticated: boolean = true;
+  isAuthenticated: boolean = false;
 
   constructor(private router: Router,
               private cognitoService: CognitoService,
@@ -22,13 +22,11 @@ export class AppComponent implements OnInit {
   }
 
   public ngOnInit(): void {
-    this.cognitoService.isAuthenticated().then( () =>
       this.loginState$.subscribe(val => {
           this.cognitoService.updateIsAuthenticated(val);
           this.isAuthenticated = val;
         }
-      )
-    );
+      );
   }
 
   public signOut(): void {
