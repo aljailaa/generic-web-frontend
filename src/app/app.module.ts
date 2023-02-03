@@ -8,6 +8,11 @@ import { SignUpComponent } from './sign-up/sign-up.component';
 import { SignInComponent } from './sign-in/sign-in.component';
 import { ProfileComponent } from './profile/profile.component';
 
+import { StoreModule } from '@ngrx/store';
+import { counterReducer } from './store/reducers/loginstatus.reducer';
+import {AuthGuardService} from "./auth/auth-guard.service";
+import {AuthGuardSignInPageService} from "./auth/auth-guard-sign-in-page.service";
+
 @NgModule({
   declarations: [
     AppComponent,
@@ -18,9 +23,10 @@ import { ProfileComponent } from './profile/profile.component';
   imports: [
     BrowserModule,
     FormsModule,
-    AppRoutingModule
+    AppRoutingModule,
+    StoreModule.forRoot({ loginState: counterReducer })
   ],
-  providers: [],
+  providers: [AuthGuardService, AuthGuardSignInPageService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

@@ -1,5 +1,10 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import {BehaviorSubject, Observable} from 'rxjs';
+
+import { Store } from '@ngrx/store';
+import { login, logout } from './store/actions/loginstatus.actions';
+
+
 import {Amplify,  Auth } from 'aws-amplify';
 
 import { environment } from '../environments/environment';
@@ -17,14 +22,14 @@ export interface IUser {
 })
 export class CognitoService {
 
-  private authenticationSubject: BehaviorSubject<any>;
+  private isUserAuthenticated: boolean = true;
 
-  constructor() {
+  constructor(private store: Store<{ loginState: boolean }>) {
     Amplify.configure({
       Auth: environment.cognito,
     });
 
-    this.authenticationSubject = new BehaviorSubject<boolean>(false);
+    // this.authenticationSubject = new BehaviorSubject<boolean>(false);
   }
 
   public signUp(user: IUser): Promise<any> {
@@ -38,30 +43,38 @@ export class CognitoService {
   public signIn(user: IUser): Promise<any> {
     return Auth.signIn(user.email, user.password)
       .then(() => {
-        this.authenticationSubject.next(true);
+        this.store.dispatch(login())
+        // this.authenticationSubject.next(true);
       });
   }
 
   public signOut(): Promise<any> {
     return Auth.signOut()
       .then(() => {
-        this.authenticationSubject.next(false);
+        this.store.dispatch(logout())
+        // this.authenticationSubject.next(false);
       });
   }
 
   public isAuthenticated(): Promise<boolean> {
-    if (this.authenticationSubject.value) {
-      console.log(this.authenticationSubject.value)
+
+    let loginState = false;
+    this.store.select('loginState').subscribe(s => loginState = s);
+
+    if (loginState) {
       return Promise.resolve(true);
     } else {
       return this.getUser()
         .then((user: any) => {
           if (user) {
+            this.store.dispatch(login())
             return true;
           } else {
+            this.store.dispatch(logout())
             return false;
           }
         }).catch(() => {
+          this.store.dispatch(logout())
           return false;
         });
     }
@@ -78,4 +91,11 @@ export class CognitoService {
       });
   }
 
+  public updateIsAuthenticated(val: boolean) {
+    this.isUserAuthenticated = val;
+  }
+
+   public getIsAuthenticated() {
+    return this.isUserAuthenticated ;
+  }
 }
